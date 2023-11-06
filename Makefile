@@ -11,4 +11,4 @@ $(firmware)/$(filename).bin: $(firmware)/$(filename).elf
 	avr-objcopy -O binary $(firmware)/$(filename).elf $(firmware)/$(filename).bin
 
 install: $(firmware)/$(filename).bin
-	avrdude -p atmega328p -c arduino -P /dev/ttyACM0 -U flash:w:$(firmware)/$(filename).bin
+	avrdude -p atmega328p -c usbasp -P /dev/ttyACM0 -U flash:w:$(firmware)/$(filename).bin
