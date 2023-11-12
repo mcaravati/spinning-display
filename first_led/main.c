@@ -9,14 +9,14 @@ int main(void)
 {
 
     DDRD |= (1 << PD6); // turning microship led on
-    PORTD |= (1 << PD6); 
+    PORTD |= (1 << PD6);
 
     // uart_init(BAUD);
 
     spi_init();
     PORTC &= ~(1 << LE); // LE // FIXME : not really a fix but maybe useless??
     spi_transmit(0b00001000);
-    
+
     // spi_transmit(0x01);
     // spi_transmit(0xe);
     /* while (1)

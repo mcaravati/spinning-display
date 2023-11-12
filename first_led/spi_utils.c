@@ -9,7 +9,7 @@ void spi_init(void)
     PORTC &= ~(1 << OE); // OE
 
     /* Enable SPI, Master, set clock rate fck/16 */
-    SPCR = (1 << SPE) | (1 << MSTR) | (1 << SPR0) ;//| (0 << DORD);
+    SPCR = (1 << SPE) | (1 << MSTR) | (1 << SPR0);//| (0 << DORD);
 }
 
 void spi_transmit(uint8_t data)
