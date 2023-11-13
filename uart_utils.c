@@ -6,8 +6,8 @@ void uart_init()
     UBRR0H = (unsigned char)(MYUBRR >> 8);
     UBRR0L = (unsigned char)MYUBRR;
     UCSR0A = (1 << U2X0);
-    // Enable transmission
-    UCSR0B = (1 << TXEN0);
+    // Enable transmission and reception and reception interrupt
+    UCSR0B = (1 << TXEN0) | (1 << RXEN0) | (1 << RXCIE0);
 
     // Set one stop bit
     UCSR0C = (0 << USBS0);
@@ -31,4 +31,15 @@ void uart_send_string(char* string) {
         uart_send_byte(*string);
         string++;
     }
+}
+
+void uart_handle_command(char* command){
+        // Si command = help, on affiche les commandes disponibles
+        if (command[0] == 'h' && command[1] == 'e' && command[2] == 'l' && command[3] == 'p')
+        {
+            uart_send_string("Available commands:\n");
+            uart_send_string("help: display this message\n");
+            uart_send_string("led on: turn on the microchip led\n");
+            uart_send_string("led off: turn off the microchip led\n");
+        }
 }

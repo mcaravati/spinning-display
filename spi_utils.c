@@ -15,7 +15,7 @@ void spi_init(void)
 
 void spi_transmit_byte(uint8_t data)
 {
-    PORTC &= ~(1 << LE); // LE
+    // PORTC &= ~(1 << LE); // LE
     /* Start transmission */
 
     SPDR = data;        // SDI
@@ -27,6 +27,8 @@ void spi_transmit_byte(uint8_t data)
 
 void spi_transmit_array(uint16_t data)
 {
+    PORTB |= (1 << PB2);
+
     uint8_t data_h = (data >> 8);
     uint8_t data_l = data;
 
@@ -34,4 +36,6 @@ void spi_transmit_array(uint16_t data)
     spi_transmit_byte(data_h);
     PORTC |= (1 << LE); // LE
     PORTC &= ~(1 << LE); // LE
+
+    PORTB &= ~(1 << PB2);
 }
