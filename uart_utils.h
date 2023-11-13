@@ -5,7 +5,6 @@
 
 // define baudrate
 #define FOSC 13000000// Clock Speed
-#define BAUD 38400
 #define MYUBRR ((FOSC/(8*BAUD))-1)
 
 
