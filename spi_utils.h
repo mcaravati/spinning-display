@@ -4,6 +4,9 @@
 #include <avr/io.h>
 #define OE PC1
 #define LE PC2
+#define SS PB2
+#define SCK PB5
+#define MOSI PB3
 
 void spi_init(void);
 void spi_transmit_byte(uint8_t data);

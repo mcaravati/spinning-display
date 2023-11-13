@@ -4,8 +4,8 @@
 void spi_init(void)
 {
     /* Set MOSI and SCK output, all others input */
-    DDRB = (1 << PB3) | (1 << PB5) | (1 << PB2);
-    DDRC |= (1 << DDC2) | (1 << DDC1);
+    DDRB = (1 << MOSI) | (1 << SCK) | (1 << SS);
+    DDRC |= (1 << OE) | (1 << LE); 
     PORTC &= ~(1 << OE); // OE
 
     /* Enable SPI, Master, set clock rate fck/16 */
@@ -27,7 +27,7 @@ void spi_transmit_byte(uint8_t data)
 
 void spi_transmit_array(uint16_t data)
 {
-    PORTB |= (1 << PB2);
+    PORTB |= (1 << SS);
 
     uint8_t data_h = (data >> 8);
     uint8_t data_l = data;
@@ -37,5 +37,5 @@ void spi_transmit_array(uint16_t data)
     PORTC |= (1 << LE); // LE
     PORTC &= ~(1 << LE); // LE
 
-    PORTB &= ~(1 << PB2);
+    PORTB &= ~(1 << SS);
 }
