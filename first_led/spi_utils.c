@@ -9,10 +9,10 @@ void spi_init(void)
     PORTC &= ~(1 << OE); // OE
 
     /* Enable SPI, Master, set clock rate fck/16 */
-    SPCR = (1 << SPE) | (1 << MSTR) | (1 << SPR0);//| (0 << DORD);
+    SPCR = (1 << SPE) | (1 << MSTR) | (1 << SPR0) | (1 << DORD);
 }
 
-void spi_transmit(uint8_t data)
+void spi_transmit_byte(uint8_t data)
 {
     PORTC &= ~(1 << LE); // LE
     /* Start transmission */
@@ -22,6 +22,15 @@ void spi_transmit(uint8_t data)
     while (!(SPSR & (1 << SPIF)))
         ;
 
+}
+
+void spi_transmit_array(uint16_t data)
+{
+    uint8_t data_h = (data >> 8);
+    uint8_t data_l = data;
+
+    spi_transmit_byte(data_l);
+    spi_transmit_byte(data_h);
     PORTC |= (1 << LE); // LE
     PORTC &= ~(1 << LE); // LE
 }

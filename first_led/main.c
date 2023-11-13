@@ -14,9 +14,9 @@ int main(void)
     // uart_init(BAUD);
 
     spi_init();
-    PORTC &= ~(1 << LE); // LE // FIXME : not really a fix but maybe useless??
-    spi_transmit(0b00001000);
-
+    // PORTC &= ~(1 << LE); // LE // FIXME : not really a fix but maybe useless??
+    // spi_transmit(0b00001000);
+    spi_transmit_array(0b1000000000000010);
     // spi_transmit(0x01);
     // spi_transmit(0xe);
     /* while (1)
