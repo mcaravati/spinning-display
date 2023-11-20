@@ -28,8 +28,6 @@ void uart_init()
 
     ring_buffer_init(&receive_buffer);    
     ring_buffer_init(&transmit_buffer);    
-
-    sei();
 }
 
 void uart_send_byte(uint8_t data)

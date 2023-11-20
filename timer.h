@@ -10,5 +10,7 @@ void __vector_on_timer_end() __attribute__((interrupt));
 uint32_t get_timer(); 
 
 void timer_init();
+void timer_reset();
+
 
 #endif // __TIMER_H__

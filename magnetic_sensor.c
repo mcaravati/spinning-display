@@ -1,12 +1,16 @@
 #include "magnetic_sensor.h"
 #include "spi_utils.h"
+#include "timer.h"
+#include "uart_utils.h"
+#include <stdio.h>
 
 ISR(INT0_vect) { // Interrupt request handler
-    PORTD |= (1 << PD6);
-    spi_transmit_array(0b1111111111111111);
-    _delay_ms(0.01);
-    PORTD &= ~(1 << PD6);
-    spi_transmit_array(0b0000000000000000);
+    //encode dt in ascii and send it
+    uint32_t tmp = get_timer();
+    if (tmp > 10 && tmp < 150) {
+        dt = tmp;
+    }
+    timer_reset();
 }
 
 void magnetic_sensor_init() {
@@ -14,4 +18,5 @@ void magnetic_sensor_init() {
         
     EICRA &= ~(1 << ISC00);  // Enable PD2 low level interrupt
     EIMSK |= (1 << INT0); // Enable interrupt request
+    dt = 0;
 }
