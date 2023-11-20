@@ -13,7 +13,11 @@
 
 void uart_init();
 void uart_send_byte(uint8_t byte);
-void uart_send_string(char* string);
-void uart_handle_command(char* command);
+void uart_send_string(const char* string);
+void uart_handle_command(const char* command);
+void uart_poll_received_cmds();
+void uart_poll_transmit_cmds();
 
-#endif // !_UART_UTILS_H_
+void uart_get_command(char *);
+
+#endif 
