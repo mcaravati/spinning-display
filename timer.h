@@ -5,7 +5,11 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 
-void __vector_on_timer_end() __attribute__((interrupt)); 
+#define TARGET_TIME 10
+#define PRESCALER 64
+
+void __vector_on_timer_end() __attribute__((interrupt));
+void __vector_on_timer_comparison_match() __attribute__((interrupt));
 
 uint32_t get_timer(); 
 
