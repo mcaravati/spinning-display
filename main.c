@@ -24,7 +24,12 @@ int main(void)
     while (1)
     {
         uint32_t current_time =get_timer();
-        if(current_time >= .99* dt/4 && current_time <= 1.01* dt/4)
+        uint32_t dt = get_round_dt();
+
+        // char buffer2 [32];
+        // sprintf(buffer2, "dt = %lu\n", dt);
+        // uart_send_string(buffer2);
+        if(current_time == dt || current_time == dt /4 || current_time == dt /2  || current_time == 3*dt /4)
         {
             spi_transmit_array(0b1111111111111111);
         } else
