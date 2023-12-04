@@ -10,8 +10,8 @@ ISR(INT0_vect) { // Interrupt request handler
     //encode dt in ascii and send it
     if(EICRA & (1 << ISC00))  // Rising edge already met
     {
-        uint32_t tmp = get_timer();
-        dt += tmp/2;
+        // uint32_t tmp = get_timer();
+        // dt += tmp/2;
         EICRA &= ~(1 << ISC00);
     } else
     {

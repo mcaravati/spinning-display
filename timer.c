@@ -31,7 +31,8 @@ void timer_init() {
     TIMSK0 |= (1 << OCIE0A); // Enable comparison interrupt
     TCCR0A |= (2 << COM0A0); // Clear OC0A bit
 
-    OCR0A = 2; // ! FIX ME ! was : 13000 / (PRESCALER * 1000) * TARGET_TIME);
+    int16_t tmp = 5;//13000 / (PRESCALER * 1000) * TARGET_TIME;
+    OCR0A = (int8_t) tmp;
 
     TCNT1 = 0;
     TCNT0 = 0;
