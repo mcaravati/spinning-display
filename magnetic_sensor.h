@@ -8,6 +8,7 @@
 #include "spi_utils.h"
 
 uint32_t get_round_dt();
+uint32_t get_round_time();
 void magnetic_sensor_init();
 
 #endif // __MAGNETIC_SENSOR_H__

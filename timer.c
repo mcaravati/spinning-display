@@ -19,8 +19,22 @@ void __vector_on_timer_comparison_match() {
 
 }
 
-uint32_t get_timer() {
+uint32_t get_human_timer() {
     return 64 * (TCNT1 + (max_count * overflow_counter)) / 13000;
+}
+
+uint32_t get_timer() {
+    return (TCNT1 + (max_count * overflow_counter));
+}
+
+uint32_t into_atmega_time(uint32_t ms)
+{
+    return 13000*ms/64;
+}
+
+uint32_t into_human_time(uint32_t t)
+{
+    return 64*t/13000;
 }
 
 void timer_init() {

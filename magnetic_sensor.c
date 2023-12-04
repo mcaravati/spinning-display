@@ -4,27 +4,42 @@
 #include "uart_utils.h"
 #include <stdio.h>
 
+#define NUM_ROUND 10
+
+volatile uint32_t last_date = 0;
 volatile uint32_t dt = 0;
-// static uint8_t detected_magnet = 0;
+volatile uint32_t dt_buffer[NUM_ROUND] = {0};
+volatile uint32_t buffer_index = 0;
 ISR(INT0_vect) { // Interrupt request handler
     //encode dt in ascii and send it
     if(EICRA & (1 << ISC00))  // Rising edge already met
     {
-        uint32_t tmp = get_timer();
-        dt += tmp/2;
+        
         EICRA &= ~(1 << ISC00);
     } else
     {
-        dt = get_timer();
-        timer_reset();
+        uint32_t tmp = get_timer();
+        // dt = dt - dt_buffer[buffer_index]/NUM_ROUND;
+        // dt_buffer[buffer_index] = tmp - last_date;
+        // dt = dt + dt_buffer[buffer_index]/NUM_ROUND;
+
+        // buffer_index = (buffer_index+1) % NUM_ROUND;
+        dt = tmp-last_date;
+        last_date = tmp;
+
+        //timer_reset();
         EICRA |= (1 << ISC00); // Enable PD2 high level interrupt
     }
-
 }
 
 uint32_t get_round_dt()
 {
     return dt;
+}
+
+uint32_t get_round_time()
+{
+    return get_timer() - last_date;
 }
 
 void magnetic_sensor_init() {

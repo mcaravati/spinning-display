@@ -18,7 +18,7 @@ all:
 	$(CC) $(CFLAGS) -o $@ $^
 
 clean:
-	rm *.elf *.bin *.o *.gch
+	rm -f *.elf *.bin *.o *.gch
 
 install: main.bin
 	avrdude -B 1 -p atmega328p -c usbasp -V -U flash:w:$<:r
