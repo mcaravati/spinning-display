@@ -12,8 +12,8 @@
 #define pi_dec 10000
 #define ATMEGA_60S (into_atmega_time(60000))
 
-volatile uint32_t hour_offset = 3;
-volatile uint32_t minute_offset = 59;
+volatile uint32_t hour_offset = 11;
+volatile uint32_t minute_offset = 1;
 
 #define EPS 52
 
@@ -47,16 +47,16 @@ int main(void)
         
         uint32_t dt = get_round_dt();
         uint32_t nb_elapsed_seconds = (global_time_human/1000) % 60;
-        uint32_t hour_comp = hour * dt / 12;
-        uint32_t minute_comp = minute * dt / 60 ;
+        uint32_t second_comp = dt - nb_elapsed_seconds * dt / 60;
+        uint32_t hour_comp = EPS + dt - hour * dt / 12;
+        uint32_t minute_comp = EPS + dt - minute * dt / 60 ;
 
 
         // char buffer[32];
         // sprintf(buffer, "%lu\n",hour_comp);
         // uart_send_string(buffer);
-        if(current_time <=  nb_elapsed_seconds * dt / 60)
+        if(current_time >= second_comp)
         {
-            //spi_transmit_array(0b0000000000000001);
             seconds = 0b0000000000000001;
         } 
 
