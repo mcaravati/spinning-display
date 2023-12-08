@@ -52,8 +52,23 @@ void uart_handle_command(const char* command){
     {
         uart_send_string("Available commands:\n");
         uart_send_string("help: display this message\n");
-        uart_send_string("led on: turn on the microchip led\n");
-        uart_send_string("led off: turn off the microchip led\n");
+    }
+
+    if(strcmp(command, "img"))
+    {
+        char frame[4];
+        while(!strcmp(frame,"end"))
+        {
+            uart_get_command(frame);
+            --received_cmd_count;
+
+            uint16_t date = frame[0] | (frame[1] << 8);
+            uint16_t payload = frame[2] | (frame[3] << 8);
+            (void)date;
+            (void)payload;
+            // TODO
+            // send frame to frame buffer
+        }
     }
 }
 
