@@ -7,6 +7,7 @@
 #include "magnetic_sensor.h"
 #include "timer.h"
 #include <stdio.h>
+#include <stdlib.h>
 
 #define pi 31415//926535
 #define pi_dec 10000
@@ -29,48 +30,46 @@ int main(void)
     timer_init();
     sei();
     uart_send_string("bonjour\n");
+    uart_poll_transmit_cmds();
 
-    //uint16_t message = 0;
+    uint16_t goal_date = 0;
+    uint16_t goal_payload = 0;
+    uint8_t goal_reached = 0;
+
+    struct frame* f = frame_buffer_get();
+
     while (1)
     {
-        uint16_t seconds = 0;
-        uint16_t hours = 0;
-        uint16_t minutes = 0;
-
         uint32_t current_time = get_round_time();
-        uint32_t global_time = get_timer();
-        uint32_t global_time_human = into_human_time(global_time);
+        uint16_t payload = 0;
 
-        uint32_t elapsed_minutes = global_time_human/60000;
-        uint32_t minute = (minute_offset+ elapsed_minutes) % 60;
-        uint32_t hour = (hour_offset+ (minute_offset+elapsed_minutes)/60) % 12;
-        
-        uint32_t dt = get_round_dt();
-        uint32_t nb_elapsed_seconds = (global_time_human/1000) % 60;
-        uint32_t second_comp = dt - nb_elapsed_seconds * dt / 60;
-        uint32_t hour_comp = EPS + dt - hour * dt / 12;
-        uint32_t minute_comp = EPS + dt - minute * dt / 60 ;
+        if (!f){
+            continue;
+        } else if (goal_reached && (f = frame_buffer_get())) {
+            goal_reached = 0;
+            goal_date = f->date;
+            goal_payload = f->payload;
+        }
 
-
-        // char buffer[32];
-        // sprintf(buffer, "%lu\n",hour_comp);
+        // uart_send_string("goal date: ");
+        // char buffer[10] = {0};
+        // itoa(goal_date, buffer, 10);
         // uart_send_string(buffer);
-        if(current_time >= second_comp)
-        {
-            seconds = 0b0000000000000001;
-        } 
+        // uart_send_string("\n");
+        // uart_send_string("current time: ");
+        // itoa(current_time, buffer, 10);
+        // uart_send_string(buffer);
+        // uart_send_string("\n");
+        // uart_poll_transmit_cmds();
 
-        if(current_time >= hour_comp - EPS && current_time <= hour_comp +EPS)
+
+        if (current_time >= goal_date - EPS && current_time <= goal_date + EPS)
         {
-            hours = 0b1111111000000000;
+            payload = goal_payload;
+            goal_reached = 1;
         }
 
-        if(current_time >= minute_comp - EPS && current_time <= minute_comp +EPS)
-        {
-            minutes = 0b1111111111111000;
-        }
-
-        spi_transmit_array((minutes | hours | seconds));
+        spi_transmit_array(payload);
 
         uart_poll_received_cmds();
         uart_poll_transmit_cmds();

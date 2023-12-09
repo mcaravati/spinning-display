@@ -19,5 +19,4 @@ void uart_poll_received_cmds();
 void uart_poll_transmit_cmds();
 
 void uart_get_command(char *);
-
 #endif 

@@ -5,21 +5,27 @@ volatile uint8_t frame_buffer_cursor_w = 0;
 volatile uint8_t frame_buffer_cursor_r = 0;
 volatile struct frame frame_buffer[FRAME_BUFFER_MAX_SIZE] = {0};
 
-void frame_buffer_put(struct frame* frame) {
+void frame_buffer_put(uint16_t date, uint16_t payload) {
     if (frame_buffer_size >= FRAME_BUFFER_MAX_SIZE)
         return;
 
-    frame_buffer[frame_buffer_cursor_w++].date = frame->date;
-    frame_buffer[frame_buffer_cursor_w++].payload = frame->payload;
+    frame_buffer[frame_buffer_cursor_w++].date = date;
+    frame_buffer[frame_buffer_cursor_w++].payload = payload;
 
     frame_buffer_size++;
 }
 
 struct frame* frame_buffer_get() {
-    struct frame* addr = &frame_buffer[frame_buffer_cursor_r++];
-    frame_buffer_cursor_r %= frame_buffer_size;
+    if (frame_buffer_cursor_r >= FRAME_BUFFER_MAX_SIZE)
+        return NULL;
+    
+    struct frame* addr = (struct frame *) &frame_buffer[frame_buffer_cursor_r++];
     
     return addr;
+}
+
+void frame_buffer_reset() {
+    frame_buffer_cursor_r = 0;
 }
 
 

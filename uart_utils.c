@@ -1,13 +1,15 @@
 #include "uart_utils.h"
 #include "ring_buffer.h"
+#include "spi_utils.h"
 #include <string.h>
 #include <avr/interrupt.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 
 struct ring_buffer receive_buffer;
 struct ring_buffer transmit_buffer;
-static int16_t received_cmd_count;
+volatile int16_t received_cmd_count = 0;
 
 void uart_init()
 {
@@ -35,7 +37,6 @@ void uart_send_byte(uint8_t data)
 {
     //stock in buffer
     ring_buffer_put(&transmit_buffer, data);
-
 }
 
 void uart_send_string(const char *str)
@@ -48,6 +49,7 @@ void uart_send_string(const char *str)
 }
 
 void uart_handle_command(const char* command){
+
     // Si command = help, on affiche les commandes disponibles
     if (!strcmp(command, "help\r"))
     {
@@ -55,20 +57,19 @@ void uart_handle_command(const char* command){
         uart_send_string("help: display this message\n");
     }
 
-    if(!strcmp(command, "img"))
+    if(strcmp(command, "img") == 0)
     {
-        char frame[4];
-        while(!strcmp(frame,"end"))
+        char frame[4] = {0};
+        while(strcmp(frame,"end") != 0)
         {
+            memset(frame, 0, 4);
             uart_get_command(frame);
             --received_cmd_count;
 
             uint16_t date = frame[0] | (frame[1] << 8);
             uint16_t payload = frame[2] | (frame[3] << 8);
-            (void)date;
-            (void)payload;
-            // TODO
-            // send frame to frame buffer
+            
+            frame_buffer_put(date, payload);
         }
     }
 }
@@ -77,7 +78,7 @@ void uart_poll_received_cmds()
 {
     while(received_cmd_count)
     {
-        char cmd [RING_BUFFER_SIZE+1]; 
+        char cmd [RING_BUFFER_SIZE+1] = {0};
         uart_get_command(cmd);
         uart_handle_command(cmd);
         --received_cmd_count;
@@ -109,12 +110,11 @@ ISR(USART_RX_vect)
     // Lire le byte reçu et le stocker
     int8_t received_data = UDR0;
 
-    // tant que '\n' n'est pas reçu, on continue de lire
-    ring_buffer_put(&receive_buffer, received_data);
-    // uart_send_string("character received\n");
     if (received_data == '\n')
     {
-        ++received_cmd_count;// notify that a command was received
-        // uart_send_string("command received\n");
+        received_cmd_count += 1;
+        // We reach here
     }
+
+    ring_buffer_put(&receive_buffer, received_data);
 }

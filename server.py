@@ -4,6 +4,7 @@ from math import pi
 import argparse
 import serial
 import array
+import socket
 
 display_mac_address = ""
 
@@ -100,7 +101,8 @@ def package_data(data: dict, resolution_time=52) -> None:
         result.append(low_word)
         result.append(high_word)
 
-    result.append(0x0A) # \n
+        result.append(0x0D)
+        result.append(0x0A)
 
     return result.tobytes()
 
@@ -129,9 +131,29 @@ if __name__ == "__main__":
     if args.display:
         plot_polar_image(polar_data)
 
-    serial_connection = serial.Serial('/dev/ttyS0', 9600, timeout=1)
-    serial_connection.write(array.array('B', [0x69, 0x6D, 0x67, 0x0A]).tobytes())
-    serial_connection.write(payload)
-    serial_connection.write(array.array('B', [0x65, 0x6E, 0x64, 0x0A]).tobytes())
-    serial_connection.close()
+    sock = socket.socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM, socket.BTPROTO_RFCOMM)
+    adapter = "B8:9A:2A:55:DC:4F" # sudo ls /var/lib/bluetooth/
+    device = "98:D3:11:FC:64:AD" # POV 12
+
+    sock.connect((device, 1))
+    print("Connected")
+
+    # Retrieving banner
+    print(sock.recv(20))
+
+    # Sending image
+    sock.send(array.array('B', [0x69, 0x6D, 0x67, 0x0D, 0x0A]).tobytes()) # img
+    sock.send(payload)
+    sock.send(array.array('B', [0x65, 0x6E, 0x64, 0x0D, 0x0A]).tobytes()) # end
+
+    print("Image sent")
+
+    try:
+        while True:
+            data = sock.recv(25)
+            print(data)
+    except KeyboardInterrupt:
+        pass
+        
+    sock.close()
     

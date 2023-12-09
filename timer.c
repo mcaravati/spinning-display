@@ -1,4 +1,5 @@
 #include "timer.h"  
+#include "spi_utils.h"
 
 volatile uint16_t overflow_counter = 0;
 volatile uint32_t max_count = 65536; // uint16_6 max value
@@ -16,7 +17,13 @@ void __vector_on_timer_end() {
 }
 
 void __vector_on_timer_comparison_match() {
-
+    struct frame* f = frame_buffer_get();
+    if(f != NULL)
+    {
+        spi_transmit_array(f->payload);
+        OCR0A = f->date - get_timer();
+        TCNT0 = 0;
+    }
 }
 
 uint32_t get_human_timer() {
@@ -44,8 +51,6 @@ void timer_init() {
     TCCR0B |= (3 << CS00);
     TIMSK0 |= (1 << OCIE0A); // Enable comparison interrupt
     TCCR0A |= (2 << COM0A0); // Clear OC0A bit
-
-    OCR0A = 2; // ! FIX ME ! was : 13000 / (PRESCALER * 1000) * TARGET_TIME);
 
     TCNT1 = 0;
     TCNT0 = 0;
