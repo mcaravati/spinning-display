@@ -2,12 +2,12 @@
 
 
 void ring_buffer_init(struct ring_buffer *rb) {
-    rb->read_pointer = NULL;
-    rb->write_pointer = NULL;
+    rb->read_pointer = 0;
+    rb->write_pointer = 0;
     rb->available_bytes = 0;
 
-    for (uint8_t i = 0; i < RING_BUFFER_SIZE; i++) {
-        rb->buffer[i] = NULL;
+    for (uint16_t i = 0; i < RING_BUFFER_SIZE; i++) {
+        rb->buffer[i] = 0;
     }
 }
 
@@ -32,7 +32,7 @@ uint8_t ring_buffer_get(struct ring_buffer *rb) {
     return return_value;
 }
 
-uint8_t ring_buffer_available_bytes(struct ring_buffer *rb) {
+uint16_t ring_buffer_available_bytes(struct ring_buffer *rb) {
     return rb->available_bytes;
 }
 

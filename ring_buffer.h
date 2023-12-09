@@ -8,14 +8,14 @@
 #include <stdint.h>
 #endif // USING_ATMEGA
 
-#define RING_BUFFER_SIZE 255
+#define RING_BUFFER_SIZE 511
 #define ABS( x ) ( ((x) < 0) ? -(x) : (x) )
 #define NULL 0x00
 
 struct ring_buffer {
-    uint8_t read_pointer;
-    uint8_t write_pointer;
-    uint8_t available_bytes;
+    uint16_t read_pointer;
+    uint16_t write_pointer;
+    uint16_t available_bytes;
 
     uint8_t buffer[RING_BUFFER_SIZE];
 };
@@ -30,7 +30,7 @@ void ring_buffer_put(struct ring_buffer *rb, uint8_t data);
 uint8_t ring_buffer_get(struct ring_buffer *rb);
 
 // Indique le nombre d'octets disponibles dans le buffer circulaire
-uint8_t ring_buffer_available_bytes(struct ring_buffer *rb);
+uint16_t ring_buffer_available_bytes(struct ring_buffer *rb);
 
 // Indique si le buffer circulaire est plein
 uint8_t ring_buffer_is_full(struct ring_buffer *rb);
