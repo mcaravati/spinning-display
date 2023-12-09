@@ -48,13 +48,13 @@ void uart_send_string(const char *str)
 
 void uart_handle_command(const char* command){
     // Si command = help, on affiche les commandes disponibles
-    if (strcmp(command, "help"))
+    if (!strcmp(command, "help"))
     {
         uart_send_string("Available commands:\n");
         uart_send_string("help: display this message\n");
     }
 
-    if(strcmp(command, "img"))
+    if(!strcmp(command, "img"))
     {
         char frame[4];
         while(!strcmp(frame,"end"))
@@ -97,10 +97,11 @@ void uart_get_command(char * cmd)
 {
     int16_t count = 0;
     char c;
-    while(ring_buffer_available_bytes(&receive_buffer) && (c = ring_buffer_get(&receive_buffer)) != '\n')
+    while(ring_buffer_available_bytes(&receive_buffer) && (c = ring_buffer_get(&receive_buffer)) != '\r')
     {
         cmd[count++] = c;
     }
+    ring_buffer_get(&receive_buffer); // get rid of \n character
 }
 
 ISR(USART_RX_vect)
