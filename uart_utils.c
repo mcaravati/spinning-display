@@ -51,7 +51,7 @@ void uart_send_string(const char *str)
 void uart_handle_command(const char* command){
 
     // Si command = help, on affiche les commandes disponibles
-    if (!strcmp(command, "help\r"))
+    if (!strcmp(command, "help"))
     {
         uart_send_string("Available commands:\n");
         uart_send_string("help: display this message\n");
@@ -103,6 +103,7 @@ void uart_get_command(char * cmd)
     {
         cmd[count++] = c;
     }
+    cmd[count-1] = '\0';
 }
 
 ISR(USART_RX_vect)
