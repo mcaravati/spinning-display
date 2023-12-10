@@ -90,6 +90,12 @@ def package_data(data: dict, resolution_time=52) -> None:
             if struct["value"] == 255:
                 word |= (0b1 << struct["r"])
 
+        a = 0
+        for i in range(16):
+            if word & (1 << i):
+                a |= (1 << (15 - i))
+
+        word = a
         print("{" + hex(date) + ", " + hex(word) + "},")
         
     return result.tobytes()
