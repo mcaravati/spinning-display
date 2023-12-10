@@ -8,22 +8,8 @@ ISR(TIMER1_OVF_vect) {
     __vector_on_timer_end();
 }
 
-ISR(TIMER0_COMPA_vect) {
-    __vector_on_timer_comparison_match();
-}
-
 void __vector_on_timer_end() {
     overflow_counter++;
-}
-
-void __vector_on_timer_comparison_match() {
-    struct frame* f = frame_buffer_get();
-    if(f != NULL)
-    {
-        spi_transmit_array(f->payload);
-        OCR0A = f->date - get_timer();
-        TCNT0 = 0;
-    }
 }
 
 uint32_t get_human_timer() {
@@ -48,12 +34,11 @@ void timer_init() {
     TCCR1B |= (3 << CS10);   // Set prescaler to 64
     TIMSK1 |= (1 << TOIE1);  // Enable overflow interrupt
 
-    TCCR0B |= (3 << CS00);
-    TIMSK0 |= (1 << OCIE0A); // Enable comparison interrupt
-    TCCR0A |= (2 << COM0A0); // Clear OC0A bit
+    // TCCR0B |= (3 << CS00);
+    // TIMSK0 |= (1 << OCIE0A); // Enable comparison interrupt
+    // TCCR0A |= (2 << COM0A0); // Clear OC0A bit
 
     TCNT1 = 0;
-    TCNT0 = 0;
 }
 
 void timer_reset()
