@@ -14,7 +14,7 @@ all:
 %.o: %.c %.h
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-%.elf: spi_utils.o uart_utils.o ring_buffer.o main.c magnetic_sensor.o timer.o
+%.elf: spi_utils.o uart_utils.o ring_buffer.o main.c magnetic_sensor.o timer.o frame_fifo.o
 	$(CC) $(CFLAGS) -o $@ $^
 
 clean:

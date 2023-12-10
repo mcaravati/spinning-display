@@ -5,6 +5,7 @@
 #include <avr/interrupt.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "frame_fifo.h"
 
 
 struct ring_buffer receive_buffer;
@@ -41,6 +42,7 @@ void uart_send_byte(uint8_t data)
 
 void uart_send_string(const char *str)
 {
+    if(strlen(str) >= (uint8_t)(RING_BUFFER_SIZE - ring_buffer_available_bytes(&transmit_buffer))) return;
     int c = 0;
     while(str[c] != '\0')
     {
@@ -51,26 +53,25 @@ void uart_send_string(const char *str)
 void uart_handle_command(const char* command){
 
     // Si command = help, on affiche les commandes disponibles
-    if (!strcmp(command, "help"))
+    // uart_send_string(command);
+    if (strcmp(command, "help") == 0)
     {
         uart_send_string("Available commands:\n");
         uart_send_string("help: display this message\n");
     }
 
-    if(strcmp(command, "img") == 0)
+    if(strncmp(command, "img", 3) == 0)
     {
-        char frame[4] = {0};
-        while(strcmp(frame,"end") != 0)
-        {
-            memset(frame, 0, 4);
-            uart_get_command(frame);
-            --received_cmd_count;
-
-            uint16_t date = frame[0] | (frame[1] << 8);
-            uint16_t payload = frame[2] | (frame[3] << 8);
-            
-            frame_buffer_put(date, payload);
-        }
+        uint16_t date = command[3] | (command[4] << 8);
+        uint16_t payload = command[5] | (command[6] << 8);
+        frame_fifo_put((struct frame){.date=date, .payload= payload});
+    }
+    if(strcmp(command, "new")==0) frame_fifo_reset();
+    if(strcmp(command, "sz")==0)
+    {
+        char buf[8];
+        sprintf(buf,"%u\n", frame_fifo_get_amount());
+        uart_send_string(buf);
     }
 }
 
