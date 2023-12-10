@@ -17,13 +17,7 @@ void __vector_on_timer_end() {
 }
 
 void __vector_on_timer_comparison_match() {
-    struct frame* f = frame_buffer_get();
-    if(f != NULL)
-    {
-        spi_transmit_array(f->payload);
-        OCR0A = f->date - get_timer();
-        TCNT0 = 0;
-    }
+
 }
 
 uint32_t get_human_timer() {

@@ -49,28 +49,11 @@ void uart_send_string(const char *str)
 }
 
 void uart_handle_command(const char* command){
-
     // Si command = help, on affiche les commandes disponibles
     if (!strcmp(command, "help"))
     {
         uart_send_string("Available commands:\n");
         uart_send_string("help: display this message\n");
-    }
-
-    if(strcmp(command, "img") == 0)
-    {
-        char frame[4] = {0};
-        while(strcmp(frame,"end") != 0)
-        {
-            memset(frame, 0, 4);
-            uart_get_command(frame);
-            --received_cmd_count;
-
-            uint16_t date = frame[0] | (frame[1] << 8);
-            uint16_t payload = frame[2] | (frame[3] << 8);
-            
-            frame_buffer_put(date, payload);
-        }
     }
 }
 
@@ -103,7 +86,7 @@ void uart_get_command(char * cmd)
     {
         cmd[count++] = c;
     }
-    cmd[count-1] = '\0';
+    cmd[count - 1] = '\0';
 }
 
 ISR(USART_RX_vect)

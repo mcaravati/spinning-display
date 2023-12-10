@@ -90,20 +90,8 @@ def package_data(data: dict, resolution_time=52) -> None:
             if struct["value"] == 255:
                 word |= (0b1 << struct["r"])
 
-        low_date = date & 0xFF
-        high_date = (date >> 8) & 0xFF
-
-        low_word = word & 0xFF
-        high_word = (word >> 8) & 0xFF
-
-        result.append(low_date)
-        result.append(high_date)
-        result.append(low_word)
-        result.append(high_word)
-
-        result.append(0x0D)
-        result.append(0x0A)
-
+        print("{" + hex(date) + ", " + hex(word) + "},")
+        
     return result.tobytes()
 
 
@@ -139,14 +127,15 @@ if __name__ == "__main__":
     print("Connected")
 
     # Retrieving banner
-    print(sock.recv(20))
+    # print(sock.recv(20))
 
     # Sending image
-    sock.send(array.array('B', [0x69, 0x6D, 0x67, 0x0D, 0x0A]).tobytes()) # img
-    sock.send(payload)
-    sock.send(array.array('B', [0x65, 0x6E, 0x64, 0x0D, 0x0A]).tobytes()) # end
+    # sock.send(array.array('B', [0x69, 0x6D, 0x67, 0x0D, 0x0A]).tobytes()) # img
+    # print(payload)
+    # sock.send(payload)
+    # sock.send(array.array('B', [0x65, 0x6E, 0x64, 0x0D, 0x0A]).tobytes()) # end
 
-    print("Image sent")
+    # print("Image sent")
 
     try:
         while True:

@@ -16,7 +16,7 @@
 volatile uint32_t hour_offset = 11;
 volatile uint32_t minute_offset = 1;
 
-#define EPS 52
+#define EPS 150
 
 
 int main(void)
@@ -29,14 +29,23 @@ int main(void)
     spi_init();
     timer_init();
     sei();
-    uart_send_string("bonjour\n");
-    uart_poll_transmit_cmds();
+    // uart_send_string("bonjour\n");
+    // uart_poll_transmit_cmds();
 
     uint16_t goal_date = 0;
     uint16_t goal_payload = 0;
     uint8_t goal_reached = 0;
+    char buffer[50] = {0};
 
-    struct frame* f = frame_buffer_get();
+
+    struct frame* f = 0;
+    while (!(f = frame_buffer_get()));
+
+    goal_date = f->date;
+    goal_payload = f->payload;
+
+    sprintf(buffer, "Initial date: %u\n", goal_date);
+    uart_send_string(buffer);
 
     while (1)
     {
@@ -49,19 +58,13 @@ int main(void)
             goal_reached = 0;
             goal_date = f->date;
             goal_payload = f->payload;
+
+            sprintf(buffer, "Goal reached, next: %u\n", goal_date);
+            uart_send_string(buffer);
         }
 
-        // uart_send_string("goal date: ");
-        // char buffer[10] = {0};
-        // itoa(goal_date, buffer, 10);
-        // uart_send_string(buffer);
-        // uart_send_string("\n");
-        // uart_send_string("current time: ");
-        // itoa(current_time, buffer, 10);
-        // uart_send_string(buffer);
-        // uart_send_string("\n");
-        // uart_poll_transmit_cmds();
-
+        sprintf(buffer, "goal date: %u, current time: %lu\n", goal_date, current_time);
+        uart_send_string(buffer);
 
         if (current_time >= goal_date - EPS && current_time <= goal_date + EPS)
         {
