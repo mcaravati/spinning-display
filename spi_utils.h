@@ -12,17 +12,6 @@
 #define NULL 0
 #endif // NULL
 
-struct frame {
-    uint16_t date;
-    uint16_t payload;
-};
-
-#define FRAME_BUFFER_MAX_SIZE 200
-
-void frame_buffer_put(uint16_t date, uint16_t payload);
-struct frame* frame_buffer_get();
-void frame_buffer_reset();
-
 
 void spi_init(void);
 void spi_transmit_byte(uint8_t data);
