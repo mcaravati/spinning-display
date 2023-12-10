@@ -69,14 +69,22 @@ def plot_polar_image(data: dict) -> None:
     data: dict
         Dictionary containing the image data
     """
-
+    omega=(2*pi)/10562
     plt.figure()
-    for theta in data:
-        for r in data[theta]:
-            if r['value'] == 255.:
-                plt.polar(theta, r['r'], 'ro')
-
+    for frame in data:
+        date = frame[3] | (frame[4] << 8);
+        payload = frame[5] | (frame[6] << 8);
+        for b in range(16):
+            if payload & (1<<b):
+                plt.polar(date*omega, b,'ro')
     plt.show()
+
+    # for theta in data:
+    #     for r in data[theta]:
+    #         if r['value'] == 255.:
+    #             plt.polar(theta, r['r'], 'ro')
+
+    # plt.show()
 
 
 def package_data(data: dict, resolution_time=52) -> None:
@@ -85,12 +93,12 @@ def package_data(data: dict, resolution_time=52) -> None:
     for theta in data:
         result = array.array('B', [])
         # Convert theta in ms
-        date = ms_to_atmega_time(int((theta * resolution_time) / (2 * pi)))
+        date = ms_to_atmega_time(resolution_time * theta  / (2 * pi))
         word = 0b00_00_00_00_00_00_00_00
 
         for struct in data[theta]:
             if struct["value"] == 255:
-                word |= (0b1 << struct["r"])
+                word |= (0b1 << (struct["r"]))
         # correcting bit direction
         # a = 0
         # for i in range(16):
@@ -116,9 +124,6 @@ def package_data(data: dict, resolution_time=52) -> None:
         result.append(low_word)
         result.append(high_word)
 
-        result.append(0x0D)
-        result.append(0x0A)
-
         frames.append(result.tobytes())
 
     return frames
@@ -131,7 +136,7 @@ if __name__ == "__main__":
     # Parse arguments
     parser = argparse.ArgumentParser(description='Controls the POV display')
     parser.add_argument('--image', type=str, help='Path to the image to display', required=True)
-    parser.add_argument('--nb_slices', type=int, help='Number of slices', default=150)
+    parser.add_argument('--nb_slices', type=int, help='Number of slices', default=100)
     parser.add_argument('--nb_leds', type=int, help='Number of leds per slice', default=16)
     parser.add_argument('--display', default=False, action='store_true', help='Display the image')
     parser.add_argument('--skip_greet', help='Skip bonjour (to use if connexion was established before)', default=False, action='store_true')
@@ -146,21 +151,24 @@ if __name__ == "__main__":
     payload = package_data(polar_data)
 
     # Print polar image from data
+    print(f"len(payload) = {len(payload)}")
     if args.display:
-        plot_polar_image(polar_data)
+        plot_polar_image(payload)
+    # print("display done")
 
     sock = socket.socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM, socket.BTPROTO_RFCOMM)
     adapter = "84:7B:57:57:3E:32" # sudo ls /var/lib/bluetooth/
     device = "98:D3:51:FE:05:8E" # POV 12
 
     sock.connect((device, 1))
-    print(f"len(payload) = {len(payload)}")
     print("Connected")
 
     # Retrieving banner
     if not args.skip_greet:
         print(sock.recv(20))
-
+    # sock.send(array.array('B', [0x6E,0x65,0x77,0x0A,0x0A,0x0A,0x0A]).tobytes()) #send new
+# 
+    # sleep(1)
     # Sending image
     packet_size = 3
     packets_amount = len(payload)//packet_size
@@ -174,7 +182,10 @@ if __name__ == "__main__":
         sock.send(payload[r+packets_amount*packet_size]) # img\xFF\xFF\xFF\xFF\r\n
         print(f"payload {r+packets_amount*packet_size} sent")
 
-    sock.send(array.array('B', [0x73,0x7A,0x0D,0x0A]).tobytes())
+
+    # sock.send(array.array('B', [0x6E,0x65,0x77,0x0A,0x0A,0x0A,0x0A]).tobytes()) #send new
+    sock.send(array.array('B', [0x73,0x7A,0x0D,0x0A,0x0A,0x0A,0x0A]).tobytes()) #send sz
+    print("sent sz")
     try:
         while True:
             data = sock.recv(25)

@@ -7,10 +7,11 @@
 #include <stdlib.h>
 #include "frame_fifo.h"
 
-
+#define FRAME_SIZE 7
 struct ring_buffer receive_buffer;
 struct ring_buffer transmit_buffer;
-volatile int16_t received_cmd_count = 0;
+volatile int8_t received_cmd_count = 0;
+volatile int8_t received_byte = 0;
 
 void uart_init()
 {
@@ -54,7 +55,7 @@ void uart_handle_command(const char* command){
 
     // Si command = help, on affiche les commandes disponibles
     // uart_send_string(command);
-    if (strcmp(command, "help") == 0)
+    if (strncmp(command, "help",4) == 0)
     {
         uart_send_string("Available commands:\n");
         uart_send_string("help: display this message\n");
@@ -66,8 +67,8 @@ void uart_handle_command(const char* command){
         uint16_t payload = command[5] | (command[6] << 8);
         frame_fifo_put((struct frame){.date=date, .payload= payload});
     }
-    if(strcmp(command, "new")==0) frame_fifo_reset();
-    if(strcmp(command, "sz")==0)
+    if(strncmp(command, "new",3)==0) frame_fifo_reset();
+    if(strncmp(command, "sz",2)==0)
     {
         char buf[8];
         sprintf(buf,"%u\n", frame_fifo_get_amount());
@@ -100,23 +101,22 @@ void uart_get_command(char * cmd)
 {
     int16_t count = 0;
     char c;
-    while(ring_buffer_available_bytes(&receive_buffer) && (c = ring_buffer_get(&receive_buffer)) != '\n')
+    while(ring_buffer_available_bytes(&receive_buffer) && count < FRAME_SIZE)
     {
+        c = ring_buffer_get(&receive_buffer);
         cmd[count++] = c;
     }
-    cmd[count-1] = '\0';
 }
 
 ISR(USART_RX_vect)
 {
     // Lire le byte reçu et le stocker
-    int8_t received_data = UDR0;
+    uint8_t received_data = UDR0;
 
-    if (received_data == '\n')
-    {
-        received_cmd_count += 1;
-        // We reach here
-    }
+    received_byte++;
+    received_cmd_count= received_byte == FRAME_SIZE ? received_cmd_count+1 : received_cmd_count;
+    received_byte %= FRAME_SIZE;
+
 
     ring_buffer_put(&receive_buffer, received_data);
 }

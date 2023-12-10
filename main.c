@@ -10,14 +10,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define pi 31415//926535
-#define pi_dec 10000
 #define ATMEGA_60S (into_atmega_time(60000))
 
 // volatile uint8_t hour_offset = 17;
 // volatile uint8_t minute_offset = 47;
 
-#define EPS 60
+#define EPS 50
 
 #define IS_AT(T,G) ((T >= G-EPS) && (T <= G+EPS))
 // void display_clock()
