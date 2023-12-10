@@ -4,12 +4,12 @@
 #include "uart_utils.h"
 #include <stdio.h>
 
-#define NUM_ROUND 10
+#define NUM_ROUND 5
 
 volatile uint32_t last_date = 0;
-volatile uint32_t dt = 0;
-volatile uint32_t dt_buffer[NUM_ROUND] = {0};
-volatile uint32_t buffer_index = 0;
+volatile uint16_t dt = 0;
+// volatile uint16_t dt_buffer[NUM_ROUND] = {0};
+// volatile uint8_t buffer_index = 0;
 ISR(INT0_vect) { // Interrupt request handler
     //encode dt in ascii and send it
     if(EICRA & (1 << ISC00))  // If we leave the magnet
@@ -19,21 +19,19 @@ ISR(INT0_vect) { // Interrupt request handler
     } else                  // If we meet the magnet
     {
         uint32_t tmp = get_timer();
-        dt = dt - dt_buffer[buffer_index]/NUM_ROUND;
-        dt_buffer[buffer_index] = tmp - last_date;
-        dt = dt + dt_buffer[buffer_index]/NUM_ROUND;
+        // dt = dt - dt_buffer[buffer_index]/NUM_ROUND;
+        // dt_buffer[buffer_index] = tmp - last_date;
+        // dt = dt + dt_buffer[buffer_index]/NUM_ROUND;
 
-        buffer_index = (buffer_index+1) % NUM_ROUND;
+        // buffer_index = (buffer_index+1) % NUM_ROUND;
         dt = tmp-last_date;
         last_date = tmp;
 
         EICRA |= (1 << ISC00); // Enable PD2 high level interrupt
     }
-
-    frame_buffer_reset();
 }
 
-uint32_t get_round_dt()
+uint16_t get_round_dt()
 {
     return dt;
 }
