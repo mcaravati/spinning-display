@@ -96,7 +96,7 @@ def package_data(data: dict, resolution_time=52) -> None:
 
 
 def ms_to_atmega_time(time: int, prescaler: int = 64) -> int:
-    return int(13000 * time / prescaler)
+    return int((13000 * time) / prescaler)
 
 if __name__ == "__main__":
     # Parse arguments

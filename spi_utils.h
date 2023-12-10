@@ -27,6 +27,7 @@ void frame_buffer_reset();
 void spi_init(void);
 void spi_transmit_byte(uint8_t data);
 void spi_transmit_array(uint16_t data);
+uint16_t payload_from_time(uint32_t time);
 
 
 

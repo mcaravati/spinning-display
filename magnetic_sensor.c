@@ -28,9 +28,9 @@ ISR(INT0_vect) { // Interrupt request handler
         last_date = tmp;
 
         EICRA |= (1 << ISC00); // Enable PD2 high level interrupt
+        frame_buffer_reset();
     }
 
-    frame_buffer_reset();
 }
 
 uint32_t get_round_dt()

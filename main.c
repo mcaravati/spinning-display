@@ -8,6 +8,7 @@
 #include "timer.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define pi 31415//926535
 #define pi_dec 10000
@@ -32,50 +33,28 @@ int main(void)
     // uart_send_string("bonjour\n");
     // uart_poll_transmit_cmds();
 
-    uint16_t goal_date = 0;
-    uint16_t goal_payload = 0;
-    uint8_t goal_reached = 0;
-    char buffer[50] = {0};
+    // uint16_t goal_date = 0;
+    // uint16_t goal_payload = 0;
+    // uint8_t goal_reached = 0;
+    // char buffer[50] = {0};
 
 
-    struct frame* f = 0;
-    while (!(f = frame_buffer_get()));
+    // struct frame* f = 0;
+    // while (!(f = frame_buffer_get()));
 
-    goal_date = f->date;
-    goal_payload = f->payload;
+    // goal_date = f->date;
+    // goal_payload = f->payload;
 
-    sprintf(buffer, "Initial date: %u\n", goal_date);
-    uart_send_string(buffer);
+    // sprintf(buffer, "Initial date: %u\n", goal_date);
+    // uart_send_string(buffer);
 
     while (1)
     {
         uint32_t current_time = get_round_time();
-        uint16_t payload = 0;
+        spi_transmit_array(payload_from_time(current_time));
 
-        if (!f){
-            continue;
-        } else if (goal_reached && (f = frame_buffer_get())) {
-            goal_reached = 0;
-            goal_date = f->date;
-            goal_payload = f->payload;
-
-            sprintf(buffer, "Goal reached, next: %u\n", goal_date);
-            uart_send_string(buffer);
-        }
-
-        sprintf(buffer, "goal date: %u, current time: %lu\n", goal_date, current_time);
-        uart_send_string(buffer);
-
-        if (current_time >= goal_date - EPS && current_time <= goal_date + EPS)
-        {
-            payload = goal_payload;
-            goal_reached = 1;
-        }
-
-        spi_transmit_array(payload);
-
-        uart_poll_received_cmds();
-        uart_poll_transmit_cmds();
+        // uart_poll_received_cmds();
+        // uart_poll_transmit_cmds();
     }
 }
 
