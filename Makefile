@@ -11,10 +11,10 @@ all:
 %.bin: %.elf
 	avr-objcopy -j .text -j .data -O binary $^ $@
 
-%.o: %.c %.h
+%.o: %.c %.h images.h
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-%.elf: spi_utils.o uart_utils.o ring_buffer.o main.c magnetic_sensor.o timer.o
+%.elf: spi_utils.o uart_utils.o ring_buffer.o main.c magnetic_sensor.o timer.o 
 	$(CC) $(CFLAGS) -o $@ $^
 
 clean:
