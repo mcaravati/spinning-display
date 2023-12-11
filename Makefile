@@ -22,6 +22,4 @@ clean:
 	rm -f *.elf *.bin *.o *.gch *.txt
 
 install: main.bin
-	python gen-images.py
-	python server.py --nb_slices=150
 	avrdude -B 1 -p atmega328p -c usbasp -V -U flash:w:$<:r
