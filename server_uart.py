@@ -24,8 +24,9 @@ def load_image(file_path: str) -> np.array:
     image = plt.imread(file_path)
 
     # Invert x and y
+    print(image.shape)
+    image = np.expand_dims(image, axis=2)
     image = np.transpose(image, (1, 0, 2))
-
     return np.mean(image, axis=-1)
 
 def convert_image(image: str, nb_slices: int, nb_leds: int) -> dict:
@@ -51,8 +52,11 @@ def convert_image(image: str, nb_slices: int, nb_leds: int) -> dict:
             # Convert to cartesian coordinates
             x = int(np.cos(theta) * r + nb_leds)
             y = int(- np.sin(theta) * r + nb_leds)
+            
+            # if image[x,y] > 0.0:
+            print(image[x,y])
 
-            if(image[x,y] == 255):
+            if(image[x,y] == 255 or image[x,y] == 1.):
                 if theta not in data:
                     data[theta] = []
                 data[theta].append({
@@ -73,9 +77,9 @@ def plot_polar_image(data: dict) -> None:
     plt.figure()
     for frame in data:
         date = frame[3] | (frame[4] << 8);
-        payload = frame[5] | (frame[6] << 8);
+        payload = frame[6] | (frame[5] << 8);
         for b in range(16):
-            if payload & (1<<b):
+            if payload & (1<<(b)):
                 plt.polar(date*omega, b,'ro')
     plt.show()
 
@@ -87,7 +91,7 @@ def plot_polar_image(data: dict) -> None:
     # plt.show()
 
 
-def package_data(data: dict, resolution_time=52) -> None:
+def package_data(data: dict, resolution_time=50) -> None:
 
     frames = []
     for theta in data:
@@ -97,7 +101,7 @@ def package_data(data: dict, resolution_time=52) -> None:
         word = 0b00_00_00_00_00_00_00_00
 
         for struct in data[theta]:
-            if struct["value"] == 255:
+            if struct["value"] == 255 or struct["value"] == 1.:
                 word |= (0b1 << (struct["r"]))
         # correcting bit direction
         # a = 0
@@ -112,8 +116,8 @@ def package_data(data: dict, resolution_time=52) -> None:
         low_date = date & 0xFF
         high_date = (date >> 8) & 0xFF
 
-        low_word = word & 0xFF
-        high_word = (word >> 8) & 0xFF
+        low_word = (word >> 8) & 0xFF
+        high_word = word & 0xFF
 
         result.append(0x69) # 0x6D, 0x67
         result.append(0x6D) #0x67
@@ -136,7 +140,7 @@ if __name__ == "__main__":
     # Parse arguments
     parser = argparse.ArgumentParser(description='Controls the POV display')
     parser.add_argument('--image', type=str, help='Path to the image to display', required=True)
-    parser.add_argument('--nb_slices', type=int, help='Number of slices', default=100)
+    parser.add_argument('--nb_slices', type=int, help='Number of slices', default=200)
     parser.add_argument('--nb_leds', type=int, help='Number of leds per slice', default=16)
     parser.add_argument('--display', default=False, action='store_true', help='Display the image')
     parser.add_argument('--skip_greet', help='Skip bonjour (to use if connexion was established before)', default=False, action='store_true')
@@ -148,7 +152,7 @@ if __name__ == "__main__":
 
     # Convert image to polar coordinates
     polar_data = convert_image(image_data, args.nb_slices, args.nb_leds)
-    payload = package_data(polar_data)
+    payload = package_data(polar_data, 46)
 
     # Print polar image from data
     print(f"len(payload) = {len(payload)}")
@@ -166,21 +170,21 @@ if __name__ == "__main__":
     # Retrieving banner
     if not args.skip_greet:
         print(sock.recv(20))
-    # sock.send(array.array('B', [0x6E,0x65,0x77,0x0A,0x0A,0x0A,0x0A]).tobytes()) #send new
-# 
-    # sleep(1)
+    sock.send(array.array('B', [0x6E,0x65,0x77,0x0A,0x0A,0x0A,0x0A]).tobytes()) #send new
+    sleep(1)
+    print("new sent")
     # Sending image
-    packet_size = 3
+    packet_size = 1
     packets_amount = len(payload)//packet_size
     for p in range (packets_amount):
         for i in range(packet_size):
             sock.send(payload[i+p*packet_size]) # img\xFF\xFF\xFF\xFF\r\n
-            print(f"payload {i+p*packet_size} sent")
-        sleep(1.5)
+            print(f"payload : {payload[i+p*packet_size]}")
+        sleep(.001)
     
     for r in range(len(payload)%packet_size):
         sock.send(payload[r+packets_amount*packet_size]) # img\xFF\xFF\xFF\xFF\r\n
-        print(f"payload {r+packets_amount*packet_size} sent")
+    print(f"payload sent")
 
 
     # sock.send(array.array('B', [0x6E,0x65,0x77,0x0A,0x0A,0x0A,0x0A]).tobytes()) #send new

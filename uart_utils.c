@@ -67,17 +67,21 @@ void uart_handle_command(const char* command){
         uint16_t payload = command[5] | (command[6] << 8);
         frame_fifo_put((struct frame){.date=date, .payload= payload});
     }
-    if(strncmp(command, "new",3)==0) frame_fifo_reset();
+    if(strncmp(command, "new",3)==0) 
+    {
+        frame_fifo_reset();
+    }
     if(strncmp(command, "sz",2)==0)
     {
         char buf[8];
-        sprintf(buf,"%u\n", frame_fifo_get_amount());
+        sprintf(buf,"sz%u\n", frame_fifo_get_amount());
         uart_send_string(buf);
     }
 }
 
 void uart_poll_received_cmds()
 {
+    cli();
     while(received_cmd_count)
     {
         char cmd [RING_BUFFER_SIZE+1] = {0};
@@ -85,6 +89,9 @@ void uart_poll_received_cmds()
         uart_handle_command(cmd);
         --received_cmd_count;
     }
+    // ring_buffer_init(&receive_buffer);
+    // received_byte= 0;
+    sei();
 }
 
 void uart_poll_transmit_cmds()

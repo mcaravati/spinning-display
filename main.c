@@ -15,7 +15,7 @@
 // volatile uint8_t hour_offset = 17;
 // volatile uint8_t minute_offset = 47;
 
-#define EPS 50
+#define EPS 52
 
 #define IS_AT(T,G) ((T >= G-EPS) && (T <= G+EPS))
 // void display_clock()
@@ -91,13 +91,13 @@ int main(void)
 
             uint8_t amount = frame_fifo_get_amount();
             uint16_t lit = 0;
-            (void)lit;
             for(uint8_t i = 0; i < amount; ++i)
             {
                 if(IS_AT(current_date, f[i].date))
                 {
-                    lit = f[i].payload;
-                    break;
+                    lit |= f[i].payload;
+                    // break;
+                    // spi_transmit_array(f[i].payload);
                 }
             }
             spi_transmit_array(lit);

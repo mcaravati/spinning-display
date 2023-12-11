@@ -8,7 +8,7 @@
 #include <stdint.h>
 #endif // USING_ATMEGA
 
-#define RING_BUFFER_SIZE 30
+#define RING_BUFFER_SIZE 8
 #define ABS( x ) ( ((x) < 0) ? -(x) : (x) )
 #define NULL 0x00
 

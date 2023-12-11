@@ -9,7 +9,7 @@ void spi_init(void)
 
     /* Enable SPI, Master, set clock rate fck/16 */
 
-    SPCR = (1 << SPE) | (1 << MSTR) | (1 << SPR0) | (1 << DORD);
+    SPCR = (1 << SPE) | (1 << MSTR) | (1 << SPR0);// | (1 << DORD);
 }
 
 void spi_transmit_byte(uint8_t data)
