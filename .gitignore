@@ -2,3 +2,5 @@
 *.elf
 .vscode
 *.o
+*.txt
+*.png

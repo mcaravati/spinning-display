@@ -1,8 +1,8 @@
 #include "spi_utils.h"
 #include "uart_utils.h"
 #include <stdio.h>
-#include "images.h"
 #include "timer.h"
+#include "images.h"
 
 volatile uint8_t frame_buffer_cursor_w = 0;
 volatile uint8_t frame_buffer_cursor_r = 0;
@@ -24,46 +24,50 @@ void frame_buffer_put(uint16_t date, uint16_t payload)
     frame_buffer_size++;
 }
 
-uint16_t payload_from_time(uint32_t time)
+uint16_t payload_from_time(uint32_t time, uint8_t upper_left, uint8_t upper_right, uint8_t lower_left, uint8_t lower_right)
 {
     // Do not ask why, but for-loops for upper-left, upper-right, etc do not work here
     // So now we have spaghetti code :(
     // But it works, so don't touch it
 
     if (time < into_atmega_time(52 / 4)) {
-        for (uint8_t i = 0; i < images_library[1][0].size; i++)
+        uint8_t size = pgm_read_byte(&(images_library[0][upper_left].size));
+        for (uint8_t i = 0; i < size; i++)
         {
-            uint16_t date = pgm_read_dword(&(images_library[1][0].frames[i].date));
+            uint16_t date = pgm_read_dword(&(images_library[0][upper_left].frames[i].date));
             if (date >= time - EPS && date <= time + EPS)
             {
-                return pgm_read_dword(&(images_library[1][0].frames[i].payload));
+                return pgm_read_dword(&(images_library[0][upper_left].frames[i].payload));
             }
         }    
     } else if (time < into_atmega_time(52 / 2)) {
-        for (uint8_t i = 0; i < images_library[0][1].size; i++)
+        uint8_t size = pgm_read_byte(&(images_library[2][lower_left].size));
+        for (uint8_t i = 0; i < size; i++)
         {
-            uint16_t date = pgm_read_dword(&(images_library[0][1].frames[i].date));
+            uint16_t date = pgm_read_dword(&(images_library[2][lower_left].frames[i].date));
             if (date >= time - EPS && date <= time + EPS)
             {
-                return pgm_read_dword(&(images_library[0][1].frames[i].payload));
+                return pgm_read_dword(&(images_library[2][lower_left].frames[i].payload));
             }
         }    
     } else if (time < into_atmega_time(52 * 3 / 4)) {
-        for (uint8_t i = 0; i < images_library[2][2].size; i++)
+        uint8_t size = pgm_read_byte(&(images_library[3][lower_right].size));
+        for (uint8_t i = 0; i < size; i++)
         {
-            uint16_t date = pgm_read_dword(&(images_library[2][2].frames[i].date));
+            uint16_t date = pgm_read_dword(&(images_library[3][lower_right].frames[i].date));
             if (date >= time - EPS && date <= time + EPS)
             {
-                return pgm_read_dword(&(images_library[2][2].frames[i].payload));
+                return pgm_read_dword(&(images_library[3][lower_right].frames[i].payload));
             }
         }    
     } else {
-        for (uint8_t i = 0; i < images_library[3][3].size; i++)
+        uint8_t size = pgm_read_byte(&(images_library[1][upper_right].size));
+        for (uint8_t i = 0; i < size; i++)
         {
-            uint16_t date = pgm_read_dword(&(images_library[3][3].frames[i].date));
+            uint16_t date = pgm_read_dword(&(images_library[1][upper_right].frames[i].date));
             if (date >= time - EPS && date <= time + EPS)
             {
-                return pgm_read_dword(&(images_library[3][3].frames[i].payload));
+                return pgm_read_dword(&(images_library[1][upper_right].frames[i].payload));
             }
         }    
     }

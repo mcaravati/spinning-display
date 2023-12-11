@@ -6,8 +6,9 @@ import serial
 import array
 import socket
 import os
+import math
 
-f = open("image.txt", "w")
+f = open("images.h", "w")
 
 
 # https://blog.kevindoran.co/bluetooth-programming-with-python-3/
@@ -29,7 +30,7 @@ def load_image(file_path: str) -> np.array:
 
     return np.mean(image, axis=-1)
 
-def convert_image(image: str, nb_slices: int) -> dict:
+def convert_image(image, nb_slices: int) -> dict:
     """
     Convert an image to polar coordinates.
 
@@ -42,23 +43,35 @@ def convert_image(image: str, nb_slices: int) -> dict:
         Dictionary containing the image data in polar coordinates
     """
     nb_leds = 16
+
+    height, width = image.shape
+
+    # img_resized = cv2.resize(image, (math.floor((nb_leds * 2 - 1) / height * width), nb_leds * 2 - 1))
+
+    # height_resized, width_resized = img_resized.shape
+    w_c = math.floor(width / 2)
+    h_c = math.floor(height / 2)
+
     data = {}
     unit = 2 * pi / nb_slices
 
     for i in range(nb_slices):
-        theta = i * unit
+        theta = 2 * math.pi / nb_slices * i
         for r in range(nb_leds):
-            # Convert to cartesian coordinates
             x = int(np.cos(theta) * r + nb_leds)
             y = int(- np.sin(theta) * r + nb_leds)
+            if 0 <= x < width and 0 <= y < height:
+                value = int(image[x, y])
 
-            if theta not in data:
-                data[theta] = []
+                if theta not in data:
+                    data[theta] = []
 
-            data[theta].append({
-                "r": r,
-                "value": image[x, y]
-            })
+                data[theta].append({
+                    "r": r,
+                    "value": image[x, y]
+                })
+
+    # plot_polar_image(data)
 
     return data
 
@@ -87,7 +100,7 @@ def package_data(data: dict, resolution_time=52) -> None:
 
     for theta in data:
         # Convert theta in ms
-        date = ms_to_atmega_time(int((theta * resolution_time) / (2 * pi)))
+        date = ms_to_atmega_time((theta * resolution_time) / (2 * pi))
         word = 0b00_00_00_00_00_00_00_00
 
         for struct in data[theta]:
@@ -102,7 +115,7 @@ def package_data(data: dict, resolution_time=52) -> None:
         word = a
 
         # Do not append if already in the list
-        if history and [date, word] in history:
+        if (history and [date, word] in history) or word == 0:
             continue
 
         history.append([date, word])
@@ -124,7 +137,20 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    serialized = "{"
+    serialized = """#ifndef __IMAGES_H__
+#define __IMAGES_H__
+
+#include "spi_utils.h"
+#include <avr/pgmspace.h>
+
+struct image
+{
+    struct frame frames[100];
+    uint8_t size;
+};
+
+const struct image images_library[4][10] PROGMEM = {
+    """
 
     for firectory in ['upper_left', 'upper_right', 'bottom_left', 'bottom_right']:
 
@@ -145,7 +171,7 @@ if __name__ == "__main__":
 
         serialized += "},"
 
-    serialized += "}"
+    serialized += "};\n#endif // !__IMAGES_H__"
 
     f.write(serialized)
 

@@ -14,10 +14,8 @@
 #define pi_dec 10000
 #define ATMEGA_60S (into_atmega_time(60000))
 
-volatile uint32_t hour_offset = 11;
-volatile uint32_t minute_offset = 1;
-
-#define EPS 150
+volatile uint32_t hour_offset = 0;
+volatile uint32_t minute_offset = 0;
 
 
 int main(void)
@@ -50,8 +48,26 @@ int main(void)
 
     while (1)
     {
+        uint16_t seconds = 0;
         uint32_t current_time = get_round_time();
-        spi_transmit_array(payload_from_time(current_time));
+
+        uint32_t global_time = get_timer();
+        uint32_t global_time_human = into_human_time(global_time);
+
+        uint32_t elapsed_minutes = global_time_human/60000;
+        uint32_t minute = (minute_offset+ elapsed_minutes) % 60;
+        uint32_t hour = (hour_offset+ (minute_offset+elapsed_minutes)/60) % 12;
+
+        uint32_t dt = get_round_dt();
+        uint32_t nb_elapsed_seconds = (global_time_human/1000) % 60;
+        uint32_t second_comp = dt - nb_elapsed_seconds * dt / 60;
+
+        if(current_time >= second_comp)
+        {
+            seconds = 0b0000000000000001;
+        } 
+
+        spi_transmit_array(payload_from_time(current_time, (uint8_t) hour / 10, (uint8_t) hour % 10, (uint8_t) minute / 10, (uint8_t) minute % 10) | seconds);
 
         // uart_poll_received_cmds();
         // uart_poll_transmit_cmds();

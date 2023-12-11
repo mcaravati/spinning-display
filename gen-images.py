@@ -33,6 +33,9 @@ for i in range(0, 3):
     draw.text(text_position_upper_left, digit_upper_left, font=font, fill='white')
 
     image = image.convert('L')
+
+    image = image.rotate(-90)
+
     # Save the image in the 'upper left' directory
     image.save('upper_left/' + str(i) + '.png')
 
@@ -50,6 +53,10 @@ for i in range(0, 10):
     draw.text(text_position_upper_right, digit_upper_right, font=font, fill='white')
 
     image = image.convert('L')
+
+    # Rotate 90deg clockwise
+    image = image.rotate(-90)
+
     # Save the image in the 'upper right' directory
     image.save('upper_right/' + str(i) + '.png')
 
@@ -68,6 +75,8 @@ for i in range(0, 7):
     draw.text(text_position_bottom_left, digit_bottom_left, font=font, fill='white')
 
     image = image.convert('L')
+    image = image.rotate(-90)
+
     # Save the image in the 'bottom left' directory
     image.save('bottom_left/' + str(i) + '.png')
 
@@ -85,5 +94,7 @@ for i in range(0, 10):
     draw.text(text_position_bottom_right, digit_bottom_right, font=font, fill='white')
 
     image = image.convert('L')
+    image = image.rotate(-90)
+
     # Save the image in the 'bottom right' directory
     image.save('bottom_right/' + str(i) + '.png')
