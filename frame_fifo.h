@@ -3,7 +3,7 @@
 
 #include <avr/io.h>
 
-#define MAX_FRAME_FIFO_SIZE 200
+#define MAX_FRAME_FIFO_SIZE 250
 
 struct frame
 {
