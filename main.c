@@ -15,7 +15,7 @@
 // volatile uint8_t hour_offset = 17;
 // volatile uint8_t minute_offset = 47;
 
-#define EPS 52
+#define EPS 104
 
 #define IS_AT(T,G) ((T >= G-EPS) && (T <= G+EPS))
 // void display_clock()

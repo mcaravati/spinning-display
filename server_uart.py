@@ -25,7 +25,8 @@ def load_image(file_path: str) -> np.array:
 
     # Invert x and y
     print(image.shape)
-    image = np.expand_dims(image, axis=2)
+    if len(image.shape) == 2:
+        image = np.expand_dims(image, axis=2)
     image = np.transpose(image, (1, 0, 2))
     return np.mean(image, axis=-1)
 
@@ -54,7 +55,6 @@ def convert_image(image: str, nb_slices: int, nb_leds: int) -> dict:
             y = int(- np.sin(theta) * r + nb_leds)
             
             # if image[x,y] > 0.0:
-            print(image[x,y])
 
             if(image[x,y] == 255 or image[x,y] == 1.):
                 if theta not in data:
@@ -152,7 +152,7 @@ if __name__ == "__main__":
 
     # Convert image to polar coordinates
     polar_data = convert_image(image_data, args.nb_slices, args.nb_leds)
-    payload = package_data(polar_data, 46)
+    payload = package_data(polar_data, 51.5)
 
     # Print polar image from data
     print(f"len(payload) = {len(payload)}")
